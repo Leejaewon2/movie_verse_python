@@ -1,7 +1,6 @@
 import json
 from routes.movie import get_movie, get_ott_movie, get_movieApi
 import re
-
 def get_combined_movie_info():
     # 영화 정보를 가져오기
     ott_movie_info = json.loads(get_ott_movie())
@@ -9,24 +8,36 @@ def get_combined_movie_info():
 
     # 영화 제목을 모으기
     titles_to_search = []
+    # 개봉일 모으기
+    releaseDate_to_search = []
 
-    # ott_movie_info에서 영화 제목 추가
     for ott_platform, movies in ott_movie_info.items():
         for movie in movies:
-            titles_to_search.append(movie['title'])
+            title = movie.get('title', 'Unknown Title')
+            releaseDate = movie.get('releaseDate', 'Unknown Release Date')
+            titles_to_search.append(title)
+            releaseDate_to_search.append(releaseDate)
+            print(f"Title: {title}, Release Date: {releaseDate}")
 
-    # movie_info에서 영화 제목 추가
+    # movie_info에서 영화 제목과 개봉일 추가
     for movie in movie_info:
-        titles_to_search.append(movie['title'])
+        title = movie.get('title', 'Unknown Title')
+        releaseDate = movie.get('releaseDate', 'Unknown Release Date')
+        titles_to_search.append(title)
+        releaseDate_to_search.append(releaseDate)
+        print(f"Title: {title}, Release Date: {releaseDate}")
 
     # 중복된 영화 제목 제거
     unique_titles = list(set(titles_to_search))
 
     extracted_info_list = []
+
+    # test 파일
     # test = get_movieApi("러브 레터")
     # testData = test.get("Data")
+
     for i in unique_titles:
-        data = get_movieApi(i)
+        data = get_movieApi(i, releaseDate_to_search)
         if 'Data' in data:
             result_data = data['Data'][0]['Result'][0]
             directors = result_data.get('directors', {}).get('director', [])
@@ -50,8 +61,11 @@ def get_combined_movie_info():
             plotText = plot.get('plotText', '').strip()
             stlls = result_data.get('stlls', '').strip()
 
+            cleaned_title = re.sub(r'!HS(.*?)!HE', r'\1', title).strip()
+            title_final = re.sub(r'\s+', ' ', cleaned_title).strip()
+
             movie_info_list = {
-                "title": title,
+                "title": title_final,
                 "posters": posters,
                 "titleEng": titleEng,
                 "reprlsDate": repRlsDate,
@@ -67,8 +81,7 @@ def get_combined_movie_info():
             }
             print("데이터 값 TEST : ", data)
             print("타이틀 값 TEST : ", title)
-            # cleaned_title = re.sub(r'!HS[^!]*!HE', '', title).strip()
-            # print(cleaned_title)
+            print(cleaned_title)
             print(movie_info_list)
             extracted_info_list.append(movie_info_list)
     return json.dumps(extracted_info_list, ensure_ascii=False, indent=4)

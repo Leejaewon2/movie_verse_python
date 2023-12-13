@@ -4,101 +4,112 @@ from bs4 import BeautifulSoup
 from flask import jsonify
 
 def get_movie():
-    url = 'https://search.daum.net/search?nil_suggest=btn&w=tot&DA=SBC&q=%EC%98%81%ED%99%94%EC%88%9C%EC%9C%84'
+
+    url = 'https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query=%ED%98%84%EC%9E%AC%EC%83%81%EC%98%81%EC%98%81%ED%99%94'
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
     }
 
-    response = requests.get(url, headers=headers)  # headers were missing in your GET request
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
-    movieInfoList = soup.find('ol', attrs={'class': 'movie_list'}).find_all('li') if soup.find('ol', attrs={
-        'class': 'movie_list'}) else []
+    movieInfoList = soup.find('body', class_='wrap-new api_animation').find_all('div', class_='card_item') if soup.find('body', class_='wrap-new api_animation') else []
 
     movie_data = []
-    release_date = "-"
 
     for movieInfo in movieInfoList:
+        # 영화 제목 정보 찾기
+        movieTitleElement = movieInfo.find('a', class_='this_text _text')
+        movieTitle = movieTitleElement.text.strip() if movieTitleElement else "-"
 
-        movieRank = movieInfo.find('span', attrs={'class': 'img_number'})
-        movieTitle = movieInfo.find('a', attrs={'class': 'tit_main'})
-        movieScore = movieInfo.find('em', attrs={'class': 'rate'})
-        cont_elements = movieInfo.find_all('dd', class_='cont')
+        # 개봉일 정보 찾기
+        releaseDateElement = movieInfo.find('dl', class_='info_group type_visible').find('dt', text='개봉')
+        movieReleaseDate = releaseDateElement.find_next('dd').text.strip() if releaseDateElement else "-"
 
-        if len(cont_elements) >= 2:
-            movieOpenDate = cont_elements[1].get_text(strip=True)
-        else:
-            movieOpenDate = "-"
+        # 평점 정보 찾기
+        ratingElement = movieInfo.find('dl', class_='info_group type_visible').find('span', class_='num')
+        movieRating = ratingElement.text.strip() if ratingElement else "-"
 
         movie_data.append({
-            'rank': movieRank.get_text() if movieRank else "-",
-            'title': movieTitle.get_text().strip() if movieTitle else "-",
-            'score': movieScore.get_text() if movieScore else "-",
-            'releaseDate': movieOpenDate
+            'title': movieTitle,
+            'releaseDate': movieReleaseDate,
+            'score': movieRating,
         })
+        print("제발 잘나와라 : ", movieReleaseDate)
+        print("movieRating : ", movieRating)
 
-        top_10_movies = movie_data[:10]
-        print("제발 잘나와라 : ", release_date)
-        print("너는 잘 나오니..?", cont_elements)
     # Convert the movie data to JSON
-    json_data = json.dumps(top_10_movies, ensure_ascii=False, indent=4)
+    json_data = json.dumps(movie_data, ensure_ascii=False, indent=4)
     return json_data
 
 def get_ott_movie():
     try:
-        url = 'https://movie.daum.net/moviedb/grade?movieId=143538'
+        movie_queries = [
+            'query=%EC%99%93%EC%B1%A0+%EC%98%81%ED%99%94',
+            'query=%EB%84%B7%ED%94%8C%EB%A6%AD%EC%8A%A4+%EC%98%81%ED%99%94',
+            'query=%ED%8B%B0%EB%B9%99+%EC%98%81%ED%99%94',
+        ]
 
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
-        }
+        base_url = 'https://search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&{movie_query}'
 
-        response = requests.get(url, headers=headers)  # headers were missing in your GET request
-        soup = BeautifulSoup(response.text, 'html.parser')
-        # 제목 가져오기
-        title = soup.find('span', class_='txt_tit').get_text(strip=True)
-
-        # 개봉일 가져오기
-        release_date = soup.find('dt', text='개봉').find_next('dd').get_text(strip=True)
-
-        # 평점 가져오기
-        rating = soup.find('dt', text='평점').find_next('dd').get_text(strip=True)
-
-        # 모든 영화 정보를 담을 리스트 초기화
+        # 각 플랫폼에 대한 리스트 초기화
         movie_data = []
 
-        for main_element in main_elements:
+        for movie_query in movie_queries:
+            url = base_url.format(movie_query=movie_query)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers)
+            soup = BeautifulSoup(response.text, 'html.parser')
 
-            movieTitle = title.find('span', class_='txt_tit')
-            movieScore = release_date.find('dd', class_='rank_num')
-            moviereleaseDate = rating.find('span', class_='info_grade')
+            main_elements = soup.find('ul', class_='list_info _panel').find_all('li', class_='info_box')
 
-            # 영화 정보를 딕셔너리에 추가
-            movie_data.append({
-                'rank': movieScore.get_text() if movieScore else "-",
-                'title': movieTitle.get_text().strip() if movieTitle else "-",
-                'score': moviereleaseDate.get_text() if moviereleaseDate else "-",
-            })
+            # 각 플랫폼에 대한 리스트 초기화
+            platform_movies = []
 
-            # 전체 영화 리스트에 추가
+            for main_element in main_elements:
+                # 영화 제목 정보 찾기
+                movieTitle = main_element.find('a', class_='_text').get_text(strip=True)
 
-        # 순서대로 10개씩 추출하여 리스트 생성
-        tving_movies = movie_data[:10]
-        watcha_movies = movie_data[10:20]
-        wavve_movies = movie_data[20:30]
+                # "개봉" 정보 찾기
+                movieReleaseDate = main_element.find_all('span', class_='info_txt')
+
+                # 별점 정보 찾기
+                movieRating = main_element.find('span', class_='num').get_text(strip=True)
+
+                # 개봉일 초기화
+                movieOpenDate = "-"
+                if len(movieReleaseDate) >= 2:
+                    movieOpenDateElement = movieReleaseDate[1].get_text(strip=True)
+                    movieOpenDate = movieOpenDateElement
+
+                # 영화 데이터를 딕셔너리로 만들어 플랫폼에 해당하는 리스트에 추가
+                platform_movies.append({
+                    'title': movieTitle,
+                    'release_date': movieOpenDate,
+                    'rating': movieRating,
+                })
+
+            # 전체 데이터에 추가
+            movie_data.extend(platform_movies)
+
+        # 순서대로 8개씩 추출하여 리스트 생성
+        netflix_movies = movie_data[:8]
+        watcha_movies = movie_data[8:16]
+        tving_movies = movie_data[16:24]
 
         # 각 플랫폼의 JSON 데이터 반환
         return json.dumps({
-            'tving': tving_movies,
+            'netflix': netflix_movies,
             'watcha': watcha_movies,
-            'wavve': wavve_movies
-        }, ensure_ascii=False)
+            'tving': tving_movies,
+        }, ensure_ascii=False, indent=4)
+
     except requests.exceptions.RequestException as e:
         return {'error': str(e)}
 
-print(get_ott_movie())
-
-
-def get_movieApi(title_to_search):
+def get_movieApi(title_to_search, releaseDate_to_search):
     API_KEY = 'F851HE5P50Z8OBX419D3'
 
     # 올바른 API 엔드포인트 및 매개변수
@@ -108,6 +119,7 @@ def get_movieApi(title_to_search):
         'ServiceKey': API_KEY,
         'collection': 'kmdb_new2',
         'title': title_to_search,
+        'releaseDate': releaseDate_to_search,
     }
 
     # 요청 및 응답
