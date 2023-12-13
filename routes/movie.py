@@ -117,9 +117,10 @@ def get_movieApi(title_to_search, releaseDate_to_search):
 
     req_parameters = {
         'ServiceKey': API_KEY,
-        'collection': 'kmdb_new2',
+        # 'collection': 'kmdb_new2',
         'title': title_to_search,
-        'releaseDate': releaseDate_to_search,
+        'createDte': releaseDate_to_search,
+        'detail':'N'
     }
 
     # 요청 및 응답
