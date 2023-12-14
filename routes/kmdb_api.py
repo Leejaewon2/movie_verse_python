@@ -3,18 +3,22 @@ import json
 from routes.basis_data import get_box_office, get_ott_movie
 import re
 
+# 영화 정보를 수집하는 함수
 def combine_movie_info():
     ls = []
     box_office = get_box_office()
     ls.append({"box_office":box_office})
+
+    # 넷플릭스, 왓챠, 티빙에서 영화 정보 수집
     for i in range(3):
         ott = get_ott_movie(i)
         ls.append(ott)
     print(ls)
     return ls
 
-combine_movie_info()
+# combine_movie_info()
 
+# API에서 영화 검색을 위한 리스트를 생성하는 함수
 def api_search_ls():
     movie_ls = combine_movie_info()
     unique_titles = set()
@@ -35,6 +39,7 @@ def api_search_ls():
 
 # api_search_ls()
 
+# KMDB API를 호출하여 영화 정보를 가져오는 함수
 def kmdb_api(title=None, release_date=None, director=None):
     API_KEY = 'F851HE5P50Z8OBX419D3'
     print(f"title : {title} / rlsdate : {release_date} / director : {director}")
@@ -83,6 +88,7 @@ def kmdb_api(title=None, release_date=None, director=None):
     print(f"{max_retries}번의 재시도 후에도 성공하지 못했습니다.")
     return {"error": "Maximum retries reached."}
 
+# KMDB에서 가져온 영화 정보를 가공하는 함수
 def get_kmdb_info():
     search_ls = api_search_ls()
     # print(search_ls)
@@ -147,6 +153,7 @@ def get_kmdb_info():
 
 # get_kmdb_info()
 
+# 스크립트 실행 시 KMDB 정보를 가져와 출력하는 부분
 if __name__ == '__main__':
     result = get_kmdb_info()
     if result:
