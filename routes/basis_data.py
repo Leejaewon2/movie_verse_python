@@ -3,7 +3,7 @@ import json
 from bs4 import BeautifulSoup
 from flask import jsonify
 
-# 영화 전체 개봉일 가져오기
+# 영화 전체 개봉일 + 감독 정보 가져오기
 def get_release_date(href,title):
     try:
         url = 'https://search.naver.com/search.naver'+href

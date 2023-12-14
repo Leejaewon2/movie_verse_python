@@ -10,10 +10,10 @@ def combine_movie_info():
     for i in range(3):
         ott = get_ott_movie(i)
         ls.append(ott)
-    # print(ls)
+    print(ls)
     return ls
 
-# combine_movie_info()
+combine_movie_info()
 
 def api_search_ls():
     movie_ls = combine_movie_info()
