@@ -78,3 +78,10 @@ fabric.properties
 
 *.pyc
 __pycache__/
+
+.idea/**
+
+*.idea
+
+.idea/workspace.xml
+.idea/misc.xml

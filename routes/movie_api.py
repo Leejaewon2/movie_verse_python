@@ -2,7 +2,7 @@ import requests
 import json
 from flask import Flask
 
-app = Flask(__name__)
+app2 = Flask(__name__)
 
 def get_movie_api():
     API_KEY = 'F851HE5P50Z8OBX419D3'
@@ -13,8 +13,8 @@ def get_movie_api():
     req_parameters = {
         'ServiceKey': API_KEY,
         'collection': 'kmdb_new2',
-        'releaseDts': '20231001',
-        'listCount':'10',
+        'releaseDts': '20231101',
+        'listCount':'50',
     }
 
     # 요청 및 응답
@@ -28,7 +28,7 @@ def get_movie_api():
 
 
 if __name__ == '__main__':
-    result = get_movie_api("영화 정보")
+    result = get_movie_api()
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
