@@ -1,8 +1,9 @@
 from movie_api import get_movie_api
-from flask import jsonify
 import json
+import schedule
+import time
 
-def api_extract_info():
+def get_api_extract_info():
     result_data = get_movie_api()
 
     # 필요한 정보 추출
@@ -43,17 +44,29 @@ def api_extract_info():
             "actorNm": actorNm,
             "plotText": plotText,
             "stlls": stlls,
+
         }
-        # print("데이터 값 TEST : ", data)
-        print("타이틀 값 TEST : ", title)
-        # cleaned_title = re.sub(r'!HS[^!]*!HE', '', title).strip()
-        # print(cleaned_title)
-        print(movie_info_list)
         extracted_info_list.append(movie_info_list)
+        # print("데이터 값 TEST : ", result_data)
+        # print("타이틀 값 TEST : ", title)
+        # print(movie_info_list)
     return json.dumps(extracted_info_list, ensure_ascii=False, indent=4)
 
 
-if __name__ == '__main__':
-    result = api_extract_info()
-    if result:
-        print(result)
+# 스케쥴링
+def movie_api_send():
+    result = get_api_extract_info()
+    print("movie_api 정보를 전송합니다.\n" + result)
+
+
+# 매일 정해진 시간에 동작 하도록 구현
+schedule.every().day.at("15:30").do(movie_api_send)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
+
+
+
+
