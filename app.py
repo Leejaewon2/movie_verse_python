@@ -1,9 +1,7 @@
 #app.py
 from flask import Flask, Response ,jsonify
 from flask_cors import CORS
-from routes.movie import get_movie
-from routes.movie import get_ott_movie
-from routes.moviehandler import get_combined_movie_info
+
 from routes.kmdb_api import get_kmdb_info
 
 app = Flask(__name__)
