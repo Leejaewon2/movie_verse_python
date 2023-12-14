@@ -13,7 +13,7 @@ def combine_movie_info():
     print(ls)
     return ls
 
-combine_movie_info()
+# combine_movie_info()
 
 def api_search_ls():
     movie_ls = combine_movie_info()
