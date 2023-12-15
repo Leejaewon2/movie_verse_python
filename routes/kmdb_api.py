@@ -3,41 +3,6 @@ import json
 from routes.basis_data import get_box_office, get_ott_movie
 import re
 
-# 영화 정보를 수집하는 함수
-def combine_movie_info():
-    ls = []
-    box_office = get_box_office()
-    ls.append({"box_office":box_office})
-
-    # 넷플릭스, 왓챠, 티빙에서 영화 정보 수집
-    for i in range(3):
-        ott = get_ott_movie(i)
-        ls.append(ott)
-    print(ls)
-    return ls
-
-# combine_movie_info()
-
-# API에서 영화 검색을 위한 리스트를 생성하는 함수
-def api_search_ls():
-    movie_ls = combine_movie_info()
-    unique_titles = set()
-    result = []
-
-    for movie in movie_ls:
-        for data in movie.values():
-            for e in data:
-                title = e['title']
-                release_date = e['release_date']
-                director = e['director']
-
-                if title not in unique_titles:
-                    unique_titles.add(title)
-                    result.append({'title':title, 'release_date':release_date, 'director':director})
-    print(result)
-    return result
-
-# api_search_ls()
 
 # KMDB API를 호출하여 영화 정보를 가져오는 함수
 def kmdb_api(title=None, release_date=None, director=None):
@@ -88,9 +53,10 @@ def kmdb_api(title=None, release_date=None, director=None):
     print(f"{max_retries}번의 재시도 후에도 성공하지 못했습니다.")
     return {"error": "Maximum retries reached."}
 
+
 # KMDB에서 가져온 영화 정보를 가공하는 함수
-def get_kmdb_info():
-    search_ls = api_search_ls()
+def get_kmdb_info(search_ls):
+    # search_ls = api_search_ls()
     # print(search_ls)
     result = []
     for search in search_ls:
@@ -149,12 +115,52 @@ def get_kmdb_info():
 
             result.append(movie_info_list)
             # print(result)
-    return json.dumps(result, ensure_ascii=False, indent=4)
+    # return json.dumps(result, ensure_ascii=False, indent=4)
+    return result
 
 # get_kmdb_info()
 
+# API에서 영화 검색을 위한 리스트를 생성하는 함수
+def api_search_ls(movie_ls):
+    unique_titles = set()
+    result = []
+
+    for movie in movie_ls:
+        for data in movie.values():
+            for e in data:
+                title = e['title']
+                release_date = e['release_date']
+                director = e['director']
+
+                if title not in unique_titles:
+                    unique_titles.add(title)
+                    result.append({'title':title, 'release_date':release_date, 'director':director})
+    print(result)
+    return result
+
+# api_search_ls()
+
+# 영화 정보를 수집하는 함수
+def combine_movie_info():
+    ls = []
+    box_office = get_box_office()
+    ls.append({"box_office":box_office})
+
+    # 넷플릭스, 왓챠, 티빙에서 영화 정보 수집
+    for i in range(3):
+        ott = get_ott_movie(i)
+        ls.append(ott)
+
+    search_ls = api_search_ls(ls)
+    movie_info_ls = get_kmdb_info(search_ls)
+    ls.append({"movieInfo":movie_info_ls})
+    print(ls)
+    # return ls
+    return json.dumps(ls, ensure_ascii=False, indent=4)
+# combine_movie_info()
+
 # 스크립트 실행 시 KMDB 정보를 가져와 출력하는 부분
 if __name__ == '__main__':
-    result = get_kmdb_info()
+    result = combine_movie_info()
     if result:
         print(result)
