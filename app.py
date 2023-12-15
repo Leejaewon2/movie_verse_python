@@ -3,6 +3,7 @@ from flask import Flask, Response ,jsonify
 from flask_cors import CORS
 
 from routes.kmdb_api import get_kmdb_info
+from routes.movie_api_handler import get_api_extract_info
 
 app = Flask(__name__)
 CORS(app, origins=['http://localhost:3000'])
@@ -19,6 +20,13 @@ def route_get_kmdb_info():
     result = get_kmdb_info()
 
     return Response(result, content_type='application/json; charset=utf-8')
+
+@app.route('/api/apilist', methods=['GET'])
+def route_get_api_extract_info():
+    result = get_api_extract_info()
+
+    return Response(result, content_type='application/json; charset=utf-8')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
