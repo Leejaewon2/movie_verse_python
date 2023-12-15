@@ -1,11 +1,14 @@
 import requests
 import json
 from flask import Flask
+from datetime import date, timedelta
 
 app2 = Flask(__name__)
 
 def get_movie_api():
     API_KEY = 'F851HE5P50Z8OBX419D3'
+    recall_release_date = date.today() - timedelta(30)
+    release_date = recall_release_date.strftime('%Y%m%d')
 
     # 올바른 API 엔드포인트 및 매개변수
     url = 'http://api.koreafilm.or.kr/openapi-data2/wisenut/search_api/search_json2.jsp?'
@@ -13,7 +16,7 @@ def get_movie_api():
     req_parameters = {
         'ServiceKey': API_KEY,
         'collection': 'kmdb_new2',
-        'releaseDts': '20231101',
+        'releaseDts': release_date,
         'listCount':'50',
     }
 
