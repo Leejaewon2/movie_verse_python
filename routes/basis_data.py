@@ -4,37 +4,39 @@ from bs4 import BeautifulSoup
 from flask import jsonify
 
 # 영화 전체 개봉일 + 감독 정보 가져오기
-def get_release_date(href,title):
-    try:
-        url = 'https://search.naver.com/search.naver'+href
-        # print(url)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
-        }
-        response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        main_el = soup.find('body', class_='wrap-new api_animation').find('dl', class_='info')
-        # print(f'outer : {title} = {main_el}')
-        outer_els = main_el.find_all('div', class_='info_group')
+def get_release_date(href,title, max_retries = 3):
+    retries = 0
+    while retries < max_retries:
+        try:
+            url = 'https://search.naver.com/search.naver' + href
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Raises HTTPError for bad responses
 
-        open_date = ''
+            soup = BeautifulSoup(response.text, 'html.parser')
+            main_el = soup.find('body', class_='wrap-new api_animation').find('dl', class_='info')
+            outer_els = main_el.find_all('div', class_='info_group')
 
-        if len(outer_els) >=2:
-            release_date_el = outer_els[1].find('dt')
-            # print(release_date_el)
-            release_date = release_date_el.find_next('dd').text.strip() if release_date_el else "-"
-            open_date = release_date.replace('.','')
+            open_date = ''
+            if len(outer_els) >= 2:
+                release_date_el = outer_els[1].find('dt')
+                release_date = release_date_el.find_next('dd').text.strip() if release_date_el else "-"
+                open_date = release_date.replace('.', '')
 
-        # print(open_date)
-        director_outer = soup.find('div', class_='middle_title').find_next('div').find('div', class_='area_card')
-        director = director_outer.find('strong', class_='name').find('a', class_='_text').text.strip() if director_outer else ""
-        # print(director)
+            director_outer = soup.find('div', class_='middle_title').find_next('div').find('div', class_='area_card')
+            director = director_outer.find('strong', class_='name').find('a',
+                                                                         class_='_text').text.strip() if director_outer else ""
 
-        result ={"open_date": open_date, "director":director}
+            result = {"open_date": open_date, "director": director}
+            return result
 
-        return result
-    except requests.exceptions.RequestException as e:
-        return {'error': str(e)}
+        except requests.exceptions.RequestException as e:
+            print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
+            retries += 1
+
+    return {'error': 'Max retries reached'}
 
 # 현재 상영작
 def get_box_office() :
@@ -70,11 +72,16 @@ def get_box_office() :
             rating_el = movie.find('dl', class_='info_group type_visible').find('span', class_='num')
             rating = rating_el.text.strip() if rating_el else "-"
 
+            # 포스터 정보 찾기
+            poster_el = movie.find('a', class_="img_box").find('img')
+            poster = poster_el['src']
+
             box_office.append({
                 'title': title,
                 'release_date': data.get('open_date'),
                 'director': data.get('director'),
                 'rating': rating,
+                'poster': poster
             })
 
         # print(f"box_office : {box_office}")
@@ -124,13 +131,18 @@ def get_ott_movie(num):
             # 별점 정보 찾기
             rating = main_el.find('span', class_='num').get_text(strip=True)
 
+            # 포스터 정보 찾기
+            poster_el = main_el.find('div', class_="thumb_area").find('img')
+            poster = poster_el['src']
+
 
             # 영화 데이터를 딕셔너리로 만들어 플랫폼에 해당하는 리스트에 추가
             ott_movies.append({
                 'title': title,
                 'release_date': data.get("open_date"),
                 'rating': rating,
-                'director': data.get("director")
+                'director': data.get("director"),
+                'poster':poster
             })
 
         ott_data = {ott_names[num]: ott_movies}

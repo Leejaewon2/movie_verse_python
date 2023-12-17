@@ -75,7 +75,9 @@ def get_kmdb_info(search_ls):
 
             title = result_data.get('title', '').strip()
             posters = result_data.get('posters', '').strip()
-            first_poster = posters.split('|')[0]
+            first_poster = posters.split('|')[0] if posters else search.get('poster')
+
+
             titleEng = result_data.get('titleEng', '').strip()
             repRlsDate = result_data.get('repRlsDate', '').strip()
             genre = result_data.get('genre', '').strip()
@@ -131,10 +133,11 @@ def api_search_ls(movie_ls):
                 title = e['title']
                 release_date = e['release_date']
                 director = e['director']
+                poster = e['poster']
 
                 if title not in unique_titles:
                     unique_titles.add(title)
-                    result.append({'title':title, 'release_date':release_date, 'director':director})
+                    result.append({'title':title, 'release_date':release_date, 'director':director, 'poster':poster})
     print(result)
     return result
 
