@@ -2,13 +2,21 @@ import requests
 import json
 from bs4 import BeautifulSoup
 from flask import jsonify
+import time
+import random
 
 # 영화 전체 개봉일 + 감독 정보 가져오기
 def get_release_date(href,title, max_retries = 3):
     retries = 0
     while retries < max_retries:
         try:
+
             url = 'https://search.naver.com/search.naver' + href
+
+            #지연
+            sleep_interval = random.uniform(0.5, 1.5)
+            time.sleep(sleep_interval)
+
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
             }
@@ -44,7 +52,12 @@ def get_box_office() :
     retries = 0
     while retries < max_retries:
         try :
+
             url = 'https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query=현재상영영화'
+
+            # 지연
+            sleep_interval = random.uniform(0.5, 1.5)
+            time.sleep(sleep_interval)
 
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
@@ -101,6 +114,7 @@ def get_ott_movie(num):
     max_retries = 3
     retries = 0
     while retries < max_retries:
+
         try:
             movie_queries = [
                 'query=넷플릭스+영화',
@@ -109,6 +123,10 @@ def get_ott_movie(num):
             ]
 
             base_url = 'https://search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&{movie_query}'
+
+            # 지연
+            sleep_interval = random.uniform(0.5, 1.5)
+            time.sleep(sleep_interval)
 
             ott_names = ['netflix', 'watcha', 'tving']
             # cnt = 0
@@ -128,6 +146,7 @@ def get_ott_movie(num):
             ott_movies = []
 
             for main_el in main_els:
+
                 # 영화 제목 정보 찾기
                 title_el = main_el.find('a', class_='_text')
                 title = title_el.get_text(strip=True)
