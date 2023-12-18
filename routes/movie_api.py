@@ -2,11 +2,12 @@ import requests
 import json
 from flask import Flask
 from datetime import date, timedelta
+from env import settings
 
 app2 = Flask(__name__)
 
 def get_movie_api():
-    API_KEY = 'F851HE5P50Z8OBX419D3'
+    API_KEY = settings.KMDB_API['key']
     recall_release_date = date.today() - timedelta(30)
     release_date = recall_release_date.strftime('%Y%m%d')
 

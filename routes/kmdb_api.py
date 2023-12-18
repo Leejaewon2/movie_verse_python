@@ -2,11 +2,12 @@ import requests
 import json
 from routes.basis_data import get_box_office, get_ott_movie
 import re
+from env import settings
 
 
 # KMDB API를 호출하여 영화 정보를 가져오는 함수
 def kmdb_api(title=None, release_date=None, director=None):
-    API_KEY = 'F851HE5P50Z8OBX419D3'
+    API_KEY = settings.KMDB_API['key']
     print(f"kmdb 정보 요청 : title : {title} / rlsdate : {release_date} / director : {director}")
 
     # 올바른 API 엔드포인트 및 매개변수

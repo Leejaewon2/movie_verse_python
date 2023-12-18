@@ -66,20 +66,6 @@ def get_api_extract_info():
 
 # get_api_extract_info()
 
-
-# # 스케쥴링
-# def movie_api_send():
-#     result = get_api_extract_info()
-#     print("movie_api 정보를 전송합니다.\n" + result)
-#
-#
-# # 매일 정해진 시간에 동작 하도록 구현
-# schedule.every().day.at("15:30").do(movie_api_send)
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-
 # 스크립트 실행 시 KMDB 정보를 가져와 출력하는 부분
 if __name__ == '__main__':
     result = get_api_extract_info()
