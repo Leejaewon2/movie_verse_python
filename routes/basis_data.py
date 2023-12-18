@@ -6,9 +6,10 @@ import time
 import random
 
 # 영화 전체 개봉일 + 감독 정보 가져오기
-def get_release_date(href,title, max_retries = 3):
+def get_more_data(href,title, max_retries = 3):
     retries = 0
     while retries < max_retries:
+        print(f'{title}의 추가 정보 가져오는 중 / 시도 : {retries + 1}')
         try:
 
             url = 'https://search.naver.com/search.naver' + href
@@ -44,13 +45,14 @@ def get_release_date(href,title, max_retries = 3):
             print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
             retries += 1
 
-    return {'error': 'Max retries reached'}
+    return {'error': '3번 시도 후에도 실패'}
 
 # 현재 상영작
 def get_box_office() :
     max_retries = 3
     retries = 0
     while retries < max_retries:
+        print(f'현재상영영화 정보 가져오는 중 / 시도 : {retries + 1}')
         try :
 
             url = 'https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query=현재상영영화'
@@ -82,11 +84,11 @@ def get_box_office() :
                 # 영화 상세 정보 url
                 href = title_el['href']
                 # 영화 개봉일 + 감독
-                data = get_release_date(href, title)
+                data = get_more_data(href, title)
 
                 # 평점 정보 찾기
-                rating_el = movie.find('dl', class_='info_group type_visible').find('span', class_='num')
-                rating = rating_el.text.strip() if rating_el else "-"
+                score_el = movie.find('dl', class_='info_group type_visible').find('span', class_='num')
+                score = score_el.text.strip() if score_el else "-"
 
                 # 포스터 정보 찾기
                 poster_el = movie.find('a', class_="img_box").find('img')
@@ -96,7 +98,7 @@ def get_box_office() :
                     'title': title,
                     'release_date': data.get('open_date'),
                     'director': data.get('director'),
-                    'rating': rating,
+                    'score': score,
                     'poster': poster
                 })
 
@@ -107,14 +109,14 @@ def get_box_office() :
         except requests.exceptions.RequestException as e:
             print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
             retries += 1
-    return {'error': str(e)}
+    return {'error': '3번 시도 후에도 실패'}
 
 
 def get_ott_movie(num):
     max_retries = 3
     retries = 0
     while retries < max_retries:
-
+        print(f'ott별 정보 가져오는 중 / 시도 : {retries + 1}')
         try:
             movie_queries = [
                 'query=넷플릭스+영화',
@@ -154,10 +156,10 @@ def get_ott_movie(num):
                 # 영화 상세 정보 url
                 href = title_el['href']
                 # 영화 개봉일 + 감독
-                data = get_release_date(href,title)
+                data = get_more_data(href,title)
 
                 # 별점 정보 찾기
-                rating = main_el.find('span', class_='num').get_text(strip=True)
+                score = main_el.find('span', class_='num').get_text(strip=True)
 
                 # 포스터 정보 찾기
                 poster_el = main_el.find('div', class_="thumb_area").find('img')
@@ -168,7 +170,7 @@ def get_ott_movie(num):
                 ott_movies.append({
                     'title': title,
                     'release_date': data.get("open_date"),
-                    'rating': rating,
+                    'score': score,
                     'director': data.get("director"),
                     'poster':poster
                 })
@@ -181,12 +183,12 @@ def get_ott_movie(num):
         except requests.exceptions.RequestException as e:
             print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
             retries += 1
-    return {'error': 'Max retries reached'}
+    return {'error': '3번 시도 후에도 실패'}
 
 # get_ott_movie(1)
 # get_box_office()
 
-get_release_date("?where=nexearch&sm=tab_etc&mra=bkEw&pkid=68&os=14406752&qvt=0&query=영화%20콘크리트%20유토피아","콘크리트 유토피아")
+# get_release_date("?where=nexearch&sm=tab_etc&mra=bkEw&pkid=68&os=14406752&qvt=0&query=영화%20콘크리트%20유토피아","콘크리트 유토피아")
 
 
 

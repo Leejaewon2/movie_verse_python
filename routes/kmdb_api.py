@@ -7,7 +7,7 @@ import re
 # KMDB API를 호출하여 영화 정보를 가져오는 함수
 def kmdb_api(title=None, release_date=None, director=None):
     API_KEY = 'F851HE5P50Z8OBX419D3'
-    print(f"title : {title} / rlsdate : {release_date} / director : {director}")
+    print(f"kmdb 정보 요청 : title : {title} / rlsdate : {release_date} / director : {director}")
 
     # 올바른 API 엔드포인트 및 매개변수
     url = f'http://api.koreafilm.or.kr/openapi-data2/wisenut/search_api/search_json2.jsp?collection=kmdb_new2'
@@ -34,15 +34,16 @@ def kmdb_api(title=None, release_date=None, director=None):
 
             print("결과가 없습니다.")
 
+            # 첫 시도에 결과가 없으면 파라미터를 줄여서 재 시도
             req_parameters = {
                 'ServiceKey': API_KEY,
                 'title': title,
-                'director': None,  # Reduce to fewer parameters
-                'releaseDts': None  # You can adjust as needed
+                'director': None,
+                'releaseDts': None
             }
 
             current_retry += 1
-            print(f"Retry #{current_retry}...")
+            print(f"재시도 #{current_retry}...")
 
 
         except requests.exceptions.RequestException as e:
@@ -51,17 +52,15 @@ def kmdb_api(title=None, release_date=None, director=None):
             print(f"재시도 중... (재시도 횟수: {current_retry})")
 
     print(f"{max_retries}번의 재시도 후에도 성공하지 못했습니다.")
-    return {"error": "Maximum retries reached."}
+    return {'error': '3번 시도 후에도 실패'}
 
 
 # KMDB에서 가져온 영화 정보를 가공하는 함수
 def get_kmdb_info(search_ls):
     # search_ls = api_search_ls()
-    # print(search_ls)
     result = []
     for search in search_ls:
         data = kmdb_api(search.get("title"), search.get("release_date"), search.get("director"))
-
         if 'Data' in data:
             result_data = data['Data'][0]['Result'][0]
             directors = result_data.get('directors', {}).get('director', [])
@@ -84,7 +83,7 @@ def get_kmdb_info(search_ls):
             nation = result_data.get('nation', '').strip()
             rating = result_data.get('rating', '').strip()
             runtime = result_data.get('runtime', '').strip()
-            audiAcc = result_data.get('audiAcc', '').strip()
+            score = search.get('score', '').strip()
             directorNm = director.get('directorNm', '').strip()
             actorNm = actor_names_string
 
@@ -99,6 +98,8 @@ def get_kmdb_info(search_ls):
             cleaned_dir_name = re.sub(r'!HS(.*?)!HE', r'\1', directorNm).strip()
             director = re.sub(r'\s+', ' ', cleaned_dir_name).strip()
 
+            print(f"kmbd로 부터 {title} 정보 받아옴")
+
             movie_info_list = {
                 "title": title_final,
                 "posters": first_poster,
@@ -108,7 +109,7 @@ def get_kmdb_info(search_ls):
                 "nation": nation,
                 "rating": rating,
                 "runtime": runtime,
-                "audiAcc": audiAcc,
+                "score": score,
                 "directorNm": director,
                 "actorNm": actorNm,
                 "plotText": plotText,
@@ -134,10 +135,11 @@ def api_search_ls(movie_ls):
                 release_date = e['release_date']
                 director = e['director']
                 poster = e['poster']
+                score = e['score']
 
                 if title not in unique_titles:
                     unique_titles.add(title)
-                    result.append({'title':title, 'release_date':release_date, 'director':director, 'poster':poster})
+                    result.append({'title':title, 'release_date':release_date, 'director':director, 'poster':poster, 'score':score})
     print(result)
     return result
 

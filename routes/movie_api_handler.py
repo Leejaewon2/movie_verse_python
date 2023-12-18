@@ -28,7 +28,7 @@ def get_api_extract_info():
         nation = result_data.get('nation', '').strip()
         rating = result_data.get('rating', '').strip()
         runtime = result_data.get('runtime', '').strip()
-        audiAcc = result_data.get('audiAcc', '').strip()
+        score = ' '
         directorNm = director.get('directorNm', '').strip()
         actorNm = actor_names_string
 
@@ -50,7 +50,7 @@ def get_api_extract_info():
             "nation": nation,
             "rating": rating,
             "runtime": runtime,
-            "audiAcc": audiAcc,
+            "score": score,
             "directorNm": director,
             "actorNm": actorNm,
             "plotText": plotText,
