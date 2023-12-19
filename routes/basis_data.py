@@ -35,8 +35,13 @@ def get_more_data(href,title, max_retries = 3):
                 open_date = release_date.replace('.', '')
 
             director_outer = soup.find('div', class_='middle_title').find_next('div').find('div', class_='area_card')
-            director = director_outer.find('strong', class_='name').find('a',
-                                                                         class_='_text').text.strip() if director_outer else ""
+            try:
+                director = director_outer.find('strong', class_='name').find('a', class_='_text').text.strip()
+            except AttributeError:
+                try:
+                    director = director_outer.find('strong', class_='name').find('span', class_='_text').text.strip()
+                except AttributeError:
+                    director = ""
 
             result = {"open_date": open_date, "director": director}
             return result

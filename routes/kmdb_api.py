@@ -74,8 +74,10 @@ def get_kmdb_info(search_ls):
             actor_names_string = ', '.join(actor_names)
 
             title = result_data.get('title', '').strip()
-            posters = result_data.get('posters', '').strip()
-            first_poster = posters.split('|')[0] if posters else search.get('poster')
+            # posters = result_data.get('posters', '').strip()
+            # first_poster = posters.split('|')[0] if posters else search.get('poster')
+
+            first_poster = search.get('poster')
 
 
             titleEng = result_data.get('titleEng', '').strip()
