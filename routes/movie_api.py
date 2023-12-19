@@ -8,6 +8,7 @@ app2 = Flask(__name__)
 
 def get_movie_api():
     API_KEY = settings.KMDB_API['key']
+    # 오늘 기준 -30일 전 개봉
     recall_release_date = date.today() - timedelta(30)
     release_date = recall_release_date.strftime('%Y%m%d')
 
@@ -18,7 +19,7 @@ def get_movie_api():
         'ServiceKey': API_KEY,
         'collection': 'kmdb_new2',
         'releaseDts': release_date,
-        'listCount':'50',
+        'listCount':'80',
     }
 
     # 요청 및 응답
