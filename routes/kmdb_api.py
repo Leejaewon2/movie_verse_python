@@ -81,7 +81,10 @@ def get_kmdb_info(search_ls):
 
 
             titleEng = result_data.get('titleEng', '').strip()
-            repRlsDate = result_data.get('repRlsDate', '').strip()
+
+            # repRlsDate = result_data.get('repRlsDate', '').strip()
+            repRlsDate = search.get("release_date")
+
             genre = result_data.get('genre', '').strip()
             nation = result_data.get('nation', '').strip()
             rating = result_data.get('rating', '').strip()

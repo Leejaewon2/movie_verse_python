@@ -5,6 +5,36 @@ from flask import jsonify
 import time
 import random
 
+# 포스터 url 가져오기
+def get_poster_url(url,title, max_retries = 3) :
+    retries = 0
+    while retries < max_retries:
+        print(f'{title}의 포스터 가져오는 중 / 시동 : {retries + 1}')
+        try :
+            # 지연
+            sleep_interval = random.uniform(0.5, 1.5)
+            time.sleep(sleep_interval)
+
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Raises HTTPError for bad responses
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+            main_el = soup.find('body', class_='wrap-new api_animation').find('div', class_='sec_movie_photo')
+
+
+
+            result = {}
+            return result
+
+        except requests.exceptions.RequestException as e:
+            print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
+        retries += 1
+
+    return {'error': '3번 시도 후에도 실패'}
+
 # 영화 전체 개봉일 + 감독 정보 가져오기
 def get_more_data(href,title, max_retries = 3):
     retries = 0
