@@ -96,7 +96,8 @@ def get_kmdb_info(search_ls):
 
 
             plotText = plot.get('plotText', '').strip()
-            stlls = result_data.get('stlls', '').strip()
+            # stlls = result_data.get('stlls', '').strip()
+            stlls = search.get('stlls')
 
             cleaned_title = re.sub(r'!HS(.*?)!HE', r'\1', title).strip()
             title_final = re.sub(r'\s+', ' ', cleaned_title).strip()
@@ -142,10 +143,11 @@ def api_search_ls(movie_ls):
                 director = e['director']
                 poster = e['poster']
                 score = e['score']
+                stlls = e['stlls']
 
                 if title not in unique_titles:
                     unique_titles.add(title)
-                    result.append({'title':title, 'release_date':release_date, 'director':director, 'poster':poster, 'score':score})
+                    result.append({'title':title, 'release_date':release_date, 'director':director, 'poster':poster, 'score':score, 'stlls':stlls})
     print(result)
     return result
 

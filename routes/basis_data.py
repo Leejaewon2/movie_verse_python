@@ -6,10 +6,10 @@ import time
 import random
 
 # 포스터 url 가져오기
-def get_poster_url(url,title, max_retries = 3) :
+def get_image_url(url,title, max_retries = 3) :
     retries = 0
     while retries < max_retries:
-        print(f'{title}의 포스터 가져오는 중 / 시동 : {retries + 1}')
+        print(f'{title}의 포스터 가져오는 중 / 시도 : {retries + 1}')
         try :
             # 지연
             sleep_interval = random.uniform(0.5, 1.5)
@@ -24,9 +24,39 @@ def get_poster_url(url,title, max_retries = 3) :
             soup = BeautifulSoup(response.text, 'html.parser')
             main_el = soup.find('body', class_='wrap-new api_animation').find('div', class_='sec_movie_photo')
 
+            poster_outer = main_el.find('div', class_='_image_base_poster').find('div', class_='movie_photo_list')
+            poster_el = poster_outer.find('li', class_='item').find('img')
+            poster = poster_el['data-img-src']
 
+            stlls_outer = main_el.find('div', class_='_image_base_stillcut')
 
-            result = {}
+            stlls_urls_ls = []
+
+            try:
+                if stlls_outer:
+                    stlls_list = stlls_outer.find('div', class_='movie_photo_list')
+                    stlls_els = stlls_list.find_all('li', class_='item')
+
+                    for index, li in enumerate(stlls_els):
+                        stlls_el = li.find('img')
+
+                        if stlls_el:
+                            stlls_url = stlls_el.get('data-img-src')
+                            stlls_urls_ls.append(stlls_url)
+
+                        if index == 7:
+                            break
+
+            except Exception as e :
+                print(f"스틸가져오는 중 에러 : {e}")
+                stlls_urls_ls = []
+
+            stlls_urls = "|".join(stlls_urls_ls)
+
+            print(f"{title} poster : {poster}")
+            print(f"{title} stlls : {stlls_urls}")
+
+            result = {"poster": poster, "stlls":stlls_urls}
             return result
 
         except requests.exceptions.RequestException as e:
@@ -73,7 +103,9 @@ def get_more_data(href,title, max_retries = 3):
                 except AttributeError:
                     director = ""
 
-            result = {"open_date": open_date, "director": director}
+            image_urls = get_image_url(url+"포토",title)
+
+            result = {"open_date": open_date, "director": director, "poster": image_urls.get("poster"), "stlls": image_urls.get("stlls")}
             return result
 
         except requests.exceptions.RequestException as e:
@@ -126,15 +158,16 @@ def get_box_office() :
                 score = score_el.text.strip() if score_el else "-"
 
                 # 포스터 정보 찾기
-                poster_el = movie.find('a', class_="img_box").find('img')
-                poster = poster_el['src']
+                # poster_el = movie.find('a', class_="img_box").find('img')
+                # poster = poster_el['src']
 
                 box_office.append({
                     'title': title,
                     'release_date': data.get('open_date'),
                     'director': data.get('director'),
                     'score': score,
-                    'poster': poster
+                    'poster': data.get('poster'),
+                    'stlls': data.get('stlls')
                 })
 
             # print(f"box_office : {box_office}")
@@ -197,8 +230,8 @@ def get_ott_movie(num):
                 score = main_el.find('span', class_='num').get_text(strip=True)
 
                 # 포스터 정보 찾기
-                poster_el = main_el.find('div', class_="thumb_area").find('img')
-                poster = poster_el['src']
+                # poster_el = main_el.find('div', class_="thumb_area").find('img')
+                # poster = poster_el['src']
 
 
                 # 영화 데이터를 딕셔너리로 만들어 플랫폼에 해당하는 리스트에 추가
@@ -207,7 +240,8 @@ def get_ott_movie(num):
                     'release_date': data.get("open_date"),
                     'score': score,
                     'director': data.get("director"),
-                    'poster':poster
+                    'poster': data.get("poster"),
+                    'stlls': data.get("stlls")
                 })
 
             ott_data = {ott_names[num]: ott_movies}
@@ -223,7 +257,7 @@ def get_ott_movie(num):
 # get_ott_movie(1)
 # get_box_office()
 
-# get_release_date("?where=nexearch&sm=tab_etc&mra=bkEw&pkid=68&os=14406752&qvt=0&query=영화%20콘크리트%20유토피아","콘크리트 유토피아")
+# get_more_data("?where=nexearch&sm=tab_etc&mra=bkEw&pkid=68&os=14406752&qvt=0&query=영화%20콘크리트%20유토피아","콘크리트 유토피아")
 
 
 
