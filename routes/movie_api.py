@@ -9,8 +9,10 @@ app2 = Flask(__name__)
 def get_movie_api():
     API_KEY = settings.KMDB_API['key']
     # 오늘 기준 -30일 전 개봉
-    recall_release_date = date.today() - timedelta(30)
+    recall_release_date = date.today() - timedelta(60)
     release_date = recall_release_date.strftime('%Y%m%d')
+    releaseDte = date.today().strftime('%Y%m%d')
+
 
     # 올바른 API 엔드포인트 및 매개변수
     url = 'http://api.koreafilm.or.kr/openapi-data2/wisenut/search_api/search_json2.jsp?'
@@ -19,6 +21,7 @@ def get_movie_api():
         'ServiceKey': API_KEY,
         'collection': 'kmdb_new2',
         'releaseDts': release_date,
+        'releaseDte': releaseDte,
         'listCount':'80',
     }
 
