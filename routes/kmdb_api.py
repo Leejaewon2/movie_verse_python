@@ -31,7 +31,11 @@ def kmdb_api(title=None, release_date=None, director=None):
             r.raise_for_status()  # 4xx 또는 5xx 응답에 대한 HTTPError 발생
             dict_data = r.json()
             if 'Data' in dict_data and dict_data['Data'][0].get('Result', []):
-                return dict_data  # 정상적인 JSON 데이터 반환
+                result_title = dict_data['Data'][0]['Result'][0].get('title', '').strip()
+                clear_title = re.sub(r'!HS(.*?)!HE', r'\1', result_title).strip()
+                final_result = re.sub(r'\s+', ' ', clear_title).strip()
+                if final_result.lower() == title.lower():
+                    return dict_data  # 정상적인 JSON 데이터 반환
 
             print("결과가 없습니다.")
 
