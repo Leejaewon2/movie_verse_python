@@ -5,11 +5,14 @@ from flask import jsonify
 import time
 import random
 
+DEBUG_MODE = False
+
 # 포스터 url 가져오기
 def get_image_url(url,title, max_retries = 3) :
     retries = 0
     while retries < max_retries:
-        print(f'{title}의 포스터 가져오는 중 / 시도 : {retries + 1}')
+        if DEBUG_MODE:
+            print(f'{title}의 포스터 가져오는 중 / 시도 : {retries + 1}')
         try :
             # 지연
             sleep_interval = random.uniform(0.5, 1.5)
@@ -48,19 +51,22 @@ def get_image_url(url,title, max_retries = 3) :
                             break
 
             except Exception as e :
-                print(f"스틸가져오는 중 에러 : {e}")
+                if DEBUG_MODE:
+                    print(f"스틸가져오는 중 에러 : {e}")
                 stlls_urls_ls = []
 
             stlls_urls = "|".join(stlls_urls_ls)
 
-            print(f"{title} poster : {poster}")
-            print(f"{title} stlls : {stlls_urls}")
+            if DEBUG_MODE:
+                print(f"{title} poster : {poster}")
+                print(f"{title} stlls : {stlls_urls}")
 
             result = {"poster": poster, "stlls":stlls_urls}
             return result
 
         except requests.exceptions.RequestException as e:
-            print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
+            if DEBUG_MODE:
+                print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
         retries += 1
 
     return {'error': '3번 시도 후에도 실패'}
@@ -69,7 +75,8 @@ def get_image_url(url,title, max_retries = 3) :
 def get_more_data(href,title, max_retries = 3):
     retries = 0
     while retries < max_retries:
-        print(f'{title}의 추가 정보 가져오는 중 / 시도 : {retries + 1}')
+        if DEBUG_MODE:
+            print(f'{title}의 추가 정보 가져오는 중 / 시도 : {retries + 1}')
         try:
 
             url = 'https://search.naver.com/search.naver' + href
@@ -109,7 +116,8 @@ def get_more_data(href,title, max_retries = 3):
             return result
 
         except requests.exceptions.RequestException as e:
-            print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
+            if DEBUG_MODE:
+                print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
             retries += 1
 
     return {'error': '3번 시도 후에도 실패'}
@@ -119,7 +127,8 @@ def get_box_office() :
     max_retries = 3
     retries = 0
     while retries < max_retries:
-        print(f'현재상영영화 정보 가져오는 중 / 시도 : {retries + 1}')
+        if DEBUG_MODE:
+            print(f'현재상영영화 정보 가져오는 중 / 시도 : {retries + 1}')
         try :
 
             url = 'https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&qvt=0&query=현재상영영화'
@@ -175,7 +184,8 @@ def get_box_office() :
 
 
         except requests.exceptions.RequestException as e:
-            print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
+            if DEBUG_MODE:
+                print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
             retries += 1
     return {'error': '3번 시도 후에도 실패'}
 
@@ -184,7 +194,8 @@ def get_ott_movie(num):
     max_retries = 3
     retries = 0
     while retries < max_retries:
-        print(f'ott별 정보 가져오는 중 / 시도 : {retries + 1}')
+        if DEBUG_MODE:
+            print(f'ott별 정보 가져오는 중 / 시도 : {retries + 1}')
         try:
             movie_queries = [
                 'query=넷플릭스+영화',
@@ -250,7 +261,8 @@ def get_ott_movie(num):
 
 
         except requests.exceptions.RequestException as e:
-            print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
+            if DEBUG_MODE:
+                print(f'Error: {str(e)} - Retry {retries + 1}/{max_retries}')
             retries += 1
     return {'error': '3번 시도 후에도 실패'}
 

@@ -6,6 +6,7 @@ from env import settings
 
 app2 = Flask(__name__)
 
+
 def get_movie_api():
     API_KEY = settings.KMDB_API['key']
     # 오늘 기준 -30일 전 개봉

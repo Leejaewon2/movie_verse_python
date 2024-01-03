@@ -4,6 +4,8 @@ import schedule
 import time
 import re
 
+DEBUG_MODE = False
+
 def get_api_extract_info():
     result_data_ls = get_movie_api()
 
@@ -56,9 +58,12 @@ def get_api_extract_info():
             "plotText": plotText,
             "stlls": stlls,
         }
-        print(title)
+
+        if DEBUG_MODE:
+            print(title)
         extracted_info_list.append(movie_info_list)
-    print(extracted_info_list)
+    if DEBUG_MODE:
+        print(extracted_info_list)
         # print("데이터 값 TEST : ", result_data)
         # print("타이틀 값 TEST : ", title)
         # print(movie_info_list)

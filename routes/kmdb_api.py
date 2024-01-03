@@ -4,11 +4,13 @@ from routes.basis_data import get_box_office, get_ott_movie
 import re
 from env import settings
 
+DEBUG_MODE = False
 
 # KMDB API를 호출하여 영화 정보를 가져오는 함수
 def kmdb_api(title=None, release_date=None, director=None):
     API_KEY = settings.KMDB_API['key']
-    print(f"kmdb 정보 요청 : title : {title} / rlsdate : {release_date} / director : {director}")
+    if DEBUG_MODE:
+        print(f"kmdb 정보 요청 : title : {title} / rlsdate : {release_date} / director : {director}")
 
     # 올바른 API 엔드포인트 및 매개변수
     url = f'http://api.koreafilm.or.kr/openapi-data2/wisenut/search_api/search_json2.jsp?collection=kmdb_new2'
@@ -38,8 +40,8 @@ def kmdb_api(title=None, release_date=None, director=None):
                 # 결과가 있으나 타이틀이 일치 하지 않으면 재시도
                 if final_result.lower() == title.lower():
                     return dict_data  # 정상적인 JSON 데이터 반환
-
-            print("결과가 없습니다.")
+            if DEBUG_MODE:
+                print("결과가 없습니다.")
 
             # 첫 시도에 결과가 없으면 파라미터를 줄여서 재 시도
             req_parameters = {
@@ -50,15 +52,17 @@ def kmdb_api(title=None, release_date=None, director=None):
             }
 
             current_retry += 1
-            print(f"재시도 #{current_retry}...")
+            if DEBUG_MODE:
+                print(f"재시도 #{current_retry}...")
 
 
         except requests.exceptions.RequestException as e:
-            print(f"요청 중 오류가 발생했습니다: {e}")
             current_retry += 1
-            print(f"재시도 중... (재시도 횟수: {current_retry})")
-
-    print(f"{max_retries}번의 재시도 후에도 성공하지 못했습니다.")
+            if DEBUG_MODE:
+                print(f"요청 중 오류가 발생했습니다: {e}")
+                print(f"재시도 중... (재시도 횟수: {current_retry})")
+    if DEBUG_MODE:
+        print(f"{max_retries}번의 재시도 후에도 성공하지 못했습니다.")
     return {'error': '3번 시도 후에도 실패'}
 
 
@@ -111,7 +115,8 @@ def get_kmdb_info(search_ls):
             cleaned_dir_name = re.sub(r'!HS(.*?)!HE', r'\1', directorNm).strip()
             director = re.sub(r'\s+', ' ', cleaned_dir_name).strip()
 
-            print(f"kmbd로 부터 {title} 정보 받아옴")
+            if DEBUG_MODE:
+                print(f"kmbd로 부터 {title} 정보 받아옴")
 
             movie_info_list = {
                 "title": title_final,
@@ -154,7 +159,8 @@ def api_search_ls(movie_ls):
                 if title not in unique_titles:
                     unique_titles.add(title)
                     result.append({'title':title, 'release_date':release_date, 'director':director, 'poster':poster, 'score':score, 'stlls':stlls})
-    print(result)
+    if DEBUG_MODE:
+        print(result)
     return result
 
 # api_search_ls()
@@ -173,7 +179,8 @@ def combine_movie_info():
     search_ls = api_search_ls(ls)
     movie_info_ls = get_kmdb_info(search_ls)
     ls.append({"movieInfo":movie_info_ls})
-    print(ls)
+    if DEBUG_MODE:
+        print(ls)
     # return ls
     return json.dumps(ls, ensure_ascii=False, indent=4)
 # combine_movie_info()
