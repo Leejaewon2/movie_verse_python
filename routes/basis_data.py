@@ -238,7 +238,8 @@ def get_ott_movie(num):
                 data = get_more_data(href,title)
 
                 # 별점 정보 찾기
-                score = main_el.find('span', class_='num').get_text(strip=True)
+                score_el = main_el.find('span', class_='num')
+                score = score_el.text.strip() if score_el else "-"
 
                 # 포스터 정보 찾기
                 # poster_el = main_el.find('div', class_="thumb_area").find('img')
